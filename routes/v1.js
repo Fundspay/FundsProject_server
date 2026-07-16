@@ -11,7 +11,7 @@ const businessOpportunityRouter = require("./businessopportunity.routes");
 const dashboardRouter = require("./dashboard.routes");
 const businessProcessRouter = require("./businessprocess.routes");
 const technicalAnalysisRouter = require("./technicalanalysis.routes");
-const technicalArchitectureRoutes = require("../technicalarchitecture.routes");
+const technicalArchitectureRoutes = require("./technicalarchitecture.routes");
 
 
 
