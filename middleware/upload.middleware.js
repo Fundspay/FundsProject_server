@@ -18,13 +18,13 @@ const upload = multer({
     bucket: CONFIG.s3Bucket,
     contentType: multerS3.AUTO_CONTENT_TYPE,
     key: function (req, file, cb) {
-      const uniqueName = `diagrams/${Date.now()}-${file.originalname}`;
+      const uniqueName = `uploads/${Date.now()}-${file.originalname}`;
       cb(null, uniqueName);
     },
   }),
   limits: { fileSize: 10 * 1024 * 1024 }, // 10MB
   fileFilter: function (req, file, cb) {
-    const allowed = /png|jpg|jpeg|pdf|drawio|vsdx|xml|svg|gif|bmp/;
+    const allowed = /png|jpg|jpeg|pdf|drawio|vsdx|xml|svg|gif|bmp|docx|xlsx|pptx|doc|xls|ppt/;
     const ext = allowed.test(file.originalname.toLowerCase());
     if (ext) cb(null, true);
     else cb(new Error("Invalid file type"));
