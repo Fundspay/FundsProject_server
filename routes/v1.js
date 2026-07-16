@@ -6,6 +6,8 @@ const router = express.Router();
 // const exampleRouter = require("./example.route");
 const companyRouter = require("./company.route");
 const industryProfileRouter = require("./industryprofile.route");
+const marketInformationRouter = require("./marketinformation.routes");
+const businessOpportunityRouter = require("./businessopportunity.routes");
 
 // Health Check Route
 router.get("/health", (req, res) => {
@@ -17,6 +19,8 @@ router.get("/health", (req, res) => {
 // router.use("/example", exampleRouter);
 router.use("/company", companyRouter);
 router.use("/industry-profile", industryProfileRouter);
+router.use("/market-information", marketInformationRouter);
+router.use("/business-opportunity", businessOpportunityRouter);
 
 
 
