@@ -8,6 +8,7 @@ const companyRouter = require("./company.route");
 const industryProfileRouter = require("./industryprofile.route");
 const marketInformationRouter = require("./marketinformation.routes");
 const businessOpportunityRouter = require("./businessopportunity.routes");
+const dashboardRouter = require("./dashboard.routes");
 
 // Health Check Route
 router.get("/health", (req, res) => {
@@ -21,6 +22,7 @@ router.use("/company", companyRouter);
 router.use("/industry-profile", industryProfileRouter);
 router.use("/market-information", marketInformationRouter);
 router.use("/business-opportunity", businessOpportunityRouter);
+router.use("/dashboard", dashboardRouter);
 
 
 
