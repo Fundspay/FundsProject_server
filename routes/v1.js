@@ -10,6 +10,9 @@ const marketInformationRouter = require("./marketinformation.routes");
 const businessOpportunityRouter = require("./businessopportunity.routes");
 const dashboardRouter = require("./dashboard.routes");
 const businessProcessRouter = require("./businessprocess.routes");
+const technicalAnalysisRouter = require("./technicalanalysis.routes");
+
+
 
 // Health Check Route
 router.get("/health", (req, res) => {
@@ -25,6 +28,6 @@ router.use("/market-information", marketInformationRouter);
 router.use("/business-opportunity", businessOpportunityRouter);
 router.use("/dashboard", dashboardRouter);
 router.use("/business-process", businessProcessRouter);
-
+router.use("/technical-analysis", technicalAnalysisRouter);
 
 module.exports = router;
