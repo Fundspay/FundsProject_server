@@ -17,6 +17,7 @@ const salesResourceRoutes = require("./salesresource.routes");
 const communicationRoutes = require("./communication.routes");
 const demoDocumentRoutes = require("./demodocument.routes");
 const preparationDashboardRoutes = require("./preparationdashboard.routes");
+const mapDashboardRoutes = require("./mapdashboard.routes");
 
 
 
@@ -46,6 +47,7 @@ router.use("/sales-resource", salesResourceRoutes);
 router.use("/communication", communicationRoutes);
 router.use("/demo-document", demoDocumentRoutes);
 router.use("/preparation-dashboard", preparationDashboardRoutes);
+router.use("/map-dashboard", mapDashboardRoutes);
 
 
 
