@@ -14,6 +14,7 @@ const technicalAnalysisRouter = require("./technicalanalysis.routes");
 const technicalArchitectureRoutes = require("./technicalarchitecture.routes");
 const analysisDashboardRoutes = require("./analysisdashboard.routes");
 const salesResourceRoutes = require("./salesresource.routes");
+const communicationRoutes = require("./communication.routes");
 
 
 
@@ -35,6 +36,7 @@ router.use("/technical-analysis", technicalAnalysisRouter);
 router.use("/technical-architecture", technicalArchitectureRoutes);
 router.use("/analysis-dashboard", analysisDashboardRoutes);
 router.use("/sales-resource", salesResourceRoutes);
+router.use("/communication", communicationRoutes);
 
 
 
