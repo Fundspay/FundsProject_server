@@ -12,6 +12,7 @@ const dashboardRouter = require("./dashboard.routes");
 const businessProcessRouter = require("./businessprocess.routes");
 const technicalAnalysisRouter = require("./technicalanalysis.routes");
 const technicalArchitectureRoutes = require("./technicalarchitecture.routes");
+const analysisDashboardRoutes = require("./analysisdashboard.routes");
 
 
 
@@ -31,5 +32,5 @@ router.use("/dashboard", dashboardRouter);
 router.use("/business-process", businessProcessRouter);
 router.use("/technical-analysis", technicalAnalysisRouter);
 router.use("/technical-architecture", technicalArchitectureRoutes);
-
+router.use("/analysis-dashboard", analysisDashboardRoutes);
 module.exports = router;
