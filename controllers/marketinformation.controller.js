@@ -12,7 +12,7 @@ var add = async function (req, res) {
         if (existing) return ReE(res, "Market Information already exists for this company", 409);
 
         const record = await model.MarketInformation.create(req.body);
-        return ReS(res, record, 201);
+        return ReS(res, record.toJSON(), 201);
     } catch (error) {
         return ReE(res, error.message, 422);
     }
@@ -30,7 +30,7 @@ var fetchAll = async function (req, res) {
                 { model: model.ResearchReference, where: { isDeleted: false }, required: false },
             ],
         });
-        return ReS(res, { success: true, data: records }, 200);
+        return ReS(res, { success: true, data: records.map(r => r.toJSON()) }, 200);
     } catch (error) {
         return ReE(res, error.message, 500);
     }
@@ -52,7 +52,7 @@ var fetchSingle = async function (req, res) {
         });
         if (!record) return ReE(res, "Record not found", 404);
 
-        return ReS(res, record, 200);
+        return ReS(res, record.toJSON(), 200);
     } catch (error) {
         return ReE(res, error.message, 500);
     }
@@ -75,7 +75,7 @@ var fetchByCompany = async function (req, res) {
         });
         if (!record) return ReE(res, "Record not found for this company", 404);
 
-        return ReS(res, record, 200);
+        return ReS(res, record.toJSON(), 200);
     } catch (error) {
         return ReE(res, error.message, 500);
     }
@@ -96,7 +96,7 @@ var updateRecord = async function (req, res) {
         }
 
         await record.update(req.body);
-        return ReS(res, record, 200);
+        return ReS(res, record.toJSON(), 200);
     } catch (error) {
         return ReE(res, error.message, 500);
     }
@@ -125,7 +125,7 @@ var addCompetitor = async function (req, res) {
         if (!marketInformationId || !name) return ReE(res, "marketInformationId and name are required", 400);
 
         const competitor = await model.Competitor.create(req.body);
-        return ReS(res, competitor, 201);
+        return ReS(res, competitor.toJSON(), 201);
     } catch (error) {
         return ReE(res, error.message, 422);
     }
@@ -138,7 +138,7 @@ var updateCompetitor = async function (req, res) {
         if (!competitor) return ReE(res, "Competitor not found", 404);
 
         await competitor.update(req.body);
-        return ReS(res, competitor, 200);
+        return ReS(res, competitor.toJSON(), 200);
     } catch (error) {
         return ReE(res, error.message, 500);
     }
@@ -166,7 +166,7 @@ var addPlayer = async function (req, res) {
         if (!marketInformationId || !name) return ReE(res, "marketInformationId and name are required", 400);
 
         const player = await model.IndustryPlayer.create(req.body);
-        return ReS(res, player, 201);
+        return ReS(res, player.toJSON(), 201);
     } catch (error) {
         return ReE(res, error.message, 422);
     }
@@ -179,7 +179,7 @@ var updatePlayer = async function (req, res) {
         if (!player) return ReE(res, "Player not found", 404);
 
         await player.update(req.body);
-        return ReS(res, player, 200);
+        return ReS(res, player.toJSON(), 200);
     } catch (error) {
         return ReE(res, error.message, 500);
     }
@@ -207,7 +207,7 @@ var addReference = async function (req, res) {
         if (!marketInformationId || !title) return ReE(res, "marketInformationId and title are required", 400);
 
         const reference = await model.ResearchReference.create(req.body);
-        return ReS(res, reference, 201);
+        return ReS(res, reference.toJSON(), 201);
     } catch (error) {
         return ReE(res, error.message, 422);
     }
@@ -220,7 +220,7 @@ var updateReference = async function (req, res) {
         if (!reference) return ReE(res, "Reference not found", 404);
 
         await reference.update(req.body);
-        return ReS(res, reference, 200);
+        return ReS(res, reference.toJSON(), 200);
     } catch (error) {
         return ReE(res, error.message, 500);
     }

@@ -2,10 +2,12 @@ const express = require("express");
 const router = express.Router();
 const miController = require("../controllers/marketinformation.controller");
 
+
+router.get("/company/:companyId", miController.fetchByCompany);
 router.post("/add", miController.add);
 router.get("/list", miController.fetchAll);
 router.get("/list/:id", miController.fetchSingle);
-router.get("/company/:companyId", miController.fetchByCompany);
+
 router.put("/update/:id", miController.updateRecord);
 router.delete("/delete/:id", miController.deleteRecord);
 
