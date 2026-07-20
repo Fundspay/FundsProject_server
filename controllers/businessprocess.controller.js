@@ -113,14 +113,28 @@ var deleteRecord = async function (req, res) {
 };
 module.exports.deleteRecord = deleteRecord;
 
+// ───── Helper: find-or-create the parent BusinessProcess record for a company ─────
+async function getOrCreateBusinessProcess(companyId) {
+    let record = await model.BusinessProcess.findOne({ where: { companyId, isDeleted: false } });
+    if (!record) {
+        record = await model.BusinessProcess.create({ companyId });
+    }
+    return record;
+}
+
 // ───── Departments ─────
 
 var addDepartment = async function (req, res) {
     try {
-        const { businessProcessId, name } = req.body;
-        if (!businessProcessId || !name) return ReE(res, "businessProcessId and name are required", 400);
+        const { companyId, name } = req.body;
+        if (!companyId || !name) return ReE(res, "companyId and name are required", 400);
 
-        const dept = await model.Department.create(req.body);
+        const businessProcess = await getOrCreateBusinessProcess(companyId);
+
+        const deptData = { ...req.body, businessProcessId: businessProcess.id };
+        delete deptData.companyId; // not a field on Department
+
+        const dept = await model.Department.create(deptData);
         return ReS(res, dept, 201);
     } catch (error) {
         return ReE(res, error.message, 422);
@@ -158,10 +172,15 @@ module.exports.deleteDepartment = deleteDepartment;
 
 var addActivity = async function (req, res) {
     try {
-        const { businessProcessId, name } = req.body;
-        if (!businessProcessId || !name) return ReE(res, "businessProcessId and name are required", 400);
+        const { companyId, name } = req.body;
+        if (!companyId || !name) return ReE(res, "companyId and name are required", 400);
 
-        const activity = await model.OperationalActivity.create(req.body);
+        const businessProcess = await getOrCreateBusinessProcess(companyId);
+
+        const activityData = { ...req.body, businessProcessId: businessProcess.id };
+        delete activityData.companyId; // not a field on OperationalActivity
+
+        const activity = await model.OperationalActivity.create(activityData);
         return ReS(res, activity, 201);
     } catch (error) {
         return ReE(res, error.message, 422);
@@ -199,10 +218,15 @@ module.exports.deleteActivity = deleteActivity;
 
 var addReport = async function (req, res) {
     try {
-        const { businessProcessId, name } = req.body;
-        if (!businessProcessId || !name) return ReE(res, "businessProcessId and name are required", 400);
+        const { companyId, name } = req.body;
+        if (!companyId || !name) return ReE(res, "companyId and name are required", 400);
 
-        const report = await model.ExistingReport.create(req.body);
+        const businessProcess = await getOrCreateBusinessProcess(companyId);
+
+        const reportData = { ...req.body, businessProcessId: businessProcess.id };
+        delete reportData.companyId; // not a field on ExistingReport
+
+        const report = await model.ExistingReport.create(reportData);
         return ReS(res, report, 201);
     } catch (error) {
         return ReE(res, error.message, 422);
@@ -241,12 +265,17 @@ module.exports.deleteReport = deleteReport;
 // Add via URL (no actual upload)
 var addDiagramFile = async function (req, res) {
     try {
-        const { businessProcessId, fileName, fileUrl } = req.body;
-        if (!businessProcessId || !fileName || !fileUrl) {
-            return ReE(res, "businessProcessId, fileName, and fileUrl are required", 400);
+        const { companyId, fileName, fileUrl } = req.body;
+        if (!companyId || !fileName || !fileUrl) {
+            return ReE(res, "companyId, fileName, and fileUrl are required", 400);
         }
 
-        const file = await model.ProcessDiagramFile.create(req.body);
+        const businessProcess = await getOrCreateBusinessProcess(companyId);
+
+        const fileData = { ...req.body, businessProcessId: businessProcess.id };
+        delete fileData.companyId; // not a field on ProcessDiagramFile
+
+        const file = await model.ProcessDiagramFile.create(fileData);
         return ReS(res, file, 201);
     } catch (error) {
         return ReE(res, error.message, 422);
@@ -257,12 +286,14 @@ module.exports.addDiagramFile = addDiagramFile;
 // Upload real file to S3
 var uploadDiagramFile = async function (req, res) {
     try {
-        const { businessProcessId } = req.body;
-        if (!businessProcessId) return ReE(res, "businessProcessId is required", 400);
+        const { companyId } = req.body;
+        if (!companyId) return ReE(res, "companyId is required", 400);
         if (!req.file) return ReE(res, "No file uploaded", 400);
 
+        const businessProcess = await getOrCreateBusinessProcess(companyId);
+
         const file = await model.ProcessDiagramFile.create({
-            businessProcessId,
+            businessProcessId: businessProcess.id,
             fileName: req.file.originalname,
             fileUrl: req.file.location,
             fileSize: req.file.size,
