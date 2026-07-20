@@ -8,29 +8,38 @@ var getDashboard = async function (req, res) {
         if (!companyId) return ReE(res, "companyId is required", 400);
 
         // ── M: reuse same logic as market-intelligence dashboard ──
-        const [industryProfile, marketInformation, businessOpportunity] = await Promise.all([
+        const [industryProfileRaw, marketInformationRaw, businessOpportunityRaw] = await Promise.all([
             model.IndustryProfile.findOne({ where: { companyId, isDeleted: false } }),
             model.MarketInformation.findOne({ where: { companyId, isDeleted: false } }),
             model.BusinessOpportunity.findOne({ where: { companyId, isDeleted: false } }),
         ]);
+        const industryProfile = industryProfileRaw ? industryProfileRaw.get({ plain: true }) : null;
+        const marketInformation = marketInformationRaw ? marketInformationRaw.get({ plain: true }) : null;
+        const businessOpportunity = businessOpportunityRaw ? businessOpportunityRaw.get({ plain: true }) : null;
         const mFilled = [industryProfile, marketInformation, businessOpportunity].filter(Boolean).length;
         const mPct = Math.round((mFilled / 3) * 100);
 
         // ── A: reuse same logic as analysis dashboard ──
-        const [businessProcess, technicalAnalysis, technicalArchitecture] = await Promise.all([
+        const [businessProcessRaw, technicalAnalysisRaw, technicalArchitectureRaw] = await Promise.all([
             model.BusinessProcess.findOne({ where: { companyId, isDeleted: false } }),
             model.TechnicalAnalysis.findOne({ where: { companyId, isDeleted: false } }),
             model.TechnicalArchitecture.findOne({ where: { companyId, isDeleted: false } }),
         ]);
+        const businessProcess = businessProcessRaw ? businessProcessRaw.get({ plain: true }) : null;
+        const technicalAnalysis = technicalAnalysisRaw ? technicalAnalysisRaw.get({ plain: true }) : null;
+        const technicalArchitecture = technicalArchitectureRaw ? technicalArchitectureRaw.get({ plain: true }) : null;
         const aFilled = [businessProcess, technicalAnalysis, technicalArchitecture].filter(Boolean).length;
         const aPct = Math.round((aFilled / 3) * 100);
 
         // ── P: reuse same logic as preparation dashboard ──
-        const [salesResources, communicationTemplates, demoDocuments] = await Promise.all([
+        const [salesResourcesRaw, communicationTemplatesRaw, demoDocumentsRaw] = await Promise.all([
             model.SalesResourceItem.findAll({ where: { companyId, isDeleted: false } }),
             model.CommunicationTemplate.findAll({ where: { companyId, isDeleted: false } }),
             model.DemoDocumentItem.findAll({ where: { companyId, isDeleted: false } }),
         ]);
+        const salesResources = salesResourcesRaw.map((i) => i.get({ plain: true }));
+        const communicationTemplates = communicationTemplatesRaw.map((i) => i.get({ plain: true }));
+        const demoDocuments = demoDocumentsRaw.map((i) => i.get({ plain: true }));
         const pFilled = [salesResources.length > 0, communicationTemplates.length > 0, demoDocuments.length > 0].filter(Boolean).length;
         const pPct = Math.round((pFilled / 3) * 100);
 

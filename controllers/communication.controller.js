@@ -16,8 +16,9 @@ var getTemplates = async function (req, res) {
 
         const grouped = {};
         templates.forEach((t) => {
-            if (!grouped[t.category]) grouped[t.category] = {};
-            grouped[t.category][t.subtype || "default"] = t;
+            const plain = t.get({ plain: true });
+            if (!grouped[plain.category]) grouped[plain.category] = {};
+            grouped[plain.category][plain.subtype || "default"] = plain;
         });
 
         return ReS(res, { companyId: parseInt(companyId), templates: grouped }, 200);
@@ -42,7 +43,7 @@ var upsertTemplate = async function (req, res) {
             await template.update({ content });
         }
 
-        return ReS(res, template, created ? 201 : 200);
+        return ReS(res, template.get({ plain: true }), created ? 201 : 200);
     } catch (error) {
         return ReE(res, error.message, 422);
     }
@@ -74,7 +75,8 @@ var getChecklist = async function (req, res) {
             where: { companyId, isDeleted: false },
             order: [["createdAt", "ASC"]],
         });
-        return ReS(res, { success: true, data: items }, 200);
+        const plainItems = items.map((i) => i.get({ plain: true }));
+        return ReS(res, { success: true, data: plainItems }, 200);
     } catch (error) {
         return ReE(res, error.message, 500);
     }
@@ -131,7 +133,8 @@ var getObjections = async function (req, res) {
             where: { companyId, isDeleted: false },
             order: [["createdAt", "ASC"]],
         });
-        return ReS(res, { success: true, data: items }, 200);
+        const plainItems = items.map((i) => i.get({ plain: true }));
+        return ReS(res, { success: true, data: plainItems }, 200);
     } catch (error) {
         return ReE(res, error.message, 500);
     }

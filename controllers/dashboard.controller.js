@@ -8,7 +8,7 @@ var getDashboard = async function (req, res) {
         const { companyId } = req.params;
         if (!companyId) return ReE(res, "companyId is required", 400);
 
-        const [industryProfile, marketInformation, businessOpportunity] = await Promise.all([
+        const [industryProfileRaw, marketInformationRaw, businessOpportunityRaw] = await Promise.all([
             model.IndustryProfile.findOne({ where: { companyId, isDeleted: false } }),
             model.MarketInformation.findOne({
                 where: { companyId, isDeleted: false },
@@ -23,6 +23,11 @@ var getDashboard = async function (req, res) {
                 include: [{ model: model.PainPoint, where: { isDeleted: false }, required: false }],
             }),
         ]);
+
+        // Convert to plain objects to avoid circular structure (Sequelize's include creates a 'parent' back-reference)
+        const industryProfile = industryProfileRaw ? industryProfileRaw.get({ plain: true }) : null;
+        const marketInformation = marketInformationRaw ? marketInformationRaw.get({ plain: true }) : null;
+        const businessOpportunity = businessOpportunityRaw ? businessOpportunityRaw.get({ plain: true }) : null;
 
         // ── Completion calculation ──
         // M1 fields considered "filled" if key required fields are present

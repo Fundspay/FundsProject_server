@@ -8,7 +8,7 @@ var getDashboard = async function (req, res) {
         const { companyId } = req.params;
         if (!companyId) return ReE(res, "companyId is required", 400);
 
-        const [salesResources, communicationTemplates, checklist, objections, demoDocuments, featureChecklist, knowledgeSummary] = await Promise.all([
+        const [salesResourcesRaw, communicationTemplatesRaw, checklistRaw, objectionsRaw, demoDocumentsRaw, featureChecklistRaw, knowledgeSummaryRaw] = await Promise.all([
             model.SalesResourceItem.findAll({ where: { companyId, isDeleted: false } }),
             model.CommunicationTemplate.findAll({ where: { companyId, isDeleted: false } }),
             model.MeetingChecklistItem.findAll({ where: { companyId, isDeleted: false } }),
@@ -17,6 +17,14 @@ var getDashboard = async function (req, res) {
             model.FeatureChecklistItem.findAll({ where: { companyId, isDeleted: false } }),
             model.KnowledgeSummary.findOne({ where: { companyId, isDeleted: false } }),
         ]);
+
+        const salesResources = salesResourcesRaw.map((i) => i.get({ plain: true }));
+        const communicationTemplates = communicationTemplatesRaw.map((i) => i.get({ plain: true }));
+        const checklist = checklistRaw.map((i) => i.get({ plain: true }));
+        const objections = objectionsRaw.map((i) => i.get({ plain: true }));
+        const demoDocuments = demoDocumentsRaw.map((i) => i.get({ plain: true }));
+        const featureChecklist = featureChecklistRaw.map((i) => i.get({ plain: true }));
+        const knowledgeSummary = knowledgeSummaryRaw ? knowledgeSummaryRaw.get({ plain: true }) : null;
 
         // ── P1 completion: any items present in at least N of 9 categories ──
         const p1Categories = new Set(salesResources.map((r) => r.category));

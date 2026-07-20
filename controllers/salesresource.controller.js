@@ -15,8 +15,9 @@ var getByCompany = async function (req, res) {
 
         const grouped = {};
         items.forEach((item) => {
-            if (!grouped[item.category]) grouped[item.category] = [];
-            grouped[item.category].push(item);
+            const plain = item.get({ plain: true });
+            if (!grouped[plain.category]) grouped[plain.category] = [];
+            grouped[plain.category].push(plain);
         });
 
         return ReS(res, { companyId: parseInt(companyId), resources: grouped }, 200);
