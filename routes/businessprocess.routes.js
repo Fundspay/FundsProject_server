@@ -3,9 +3,11 @@ const router = express.Router();
 const bpController = require("../controllers/businessprocess.controller");
 const upload = require("../middleware/upload.middleware");
 
+
+router.get("/list/:id", bpController.fetchSingle);
 router.post("/add", bpController.add);
 router.get("/list", bpController.fetchAll);
-router.get("/list/:id", bpController.fetchSingle);
+
 router.get("/company/:companyId", bpController.fetchByCompany);
 router.put("/update/:id", bpController.updateRecord);
 router.delete("/delete/:id", bpController.deleteRecord);
