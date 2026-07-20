@@ -121,10 +121,22 @@ module.exports.deleteRecord = deleteRecord;
 
 var addCompetitor = async function (req, res) {
     try {
-        const { marketInformationId, name } = req.body;
-        if (!marketInformationId || !name) return ReE(res, "marketInformationId and name are required", 400);
+        const { companyId, name } = req.body;
+        if (!companyId || !name) return ReE(res, "companyId and name are required", 400);
 
-        const competitor = await model.Competitor.create(req.body);
+        // Find the company's Market Information record, or create one if it doesn't exist yet
+        let marketInformation = await model.MarketInformation.findOne({
+            where: { companyId, isDeleted: false },
+        });
+
+        if (!marketInformation) {
+            marketInformation = await model.MarketInformation.create({ companyId });
+        }
+
+        const competitorData = { ...req.body, marketInformationId: marketInformation.id };
+        delete competitorData.companyId; // not a field on Competitor
+
+        const competitor = await model.Competitor.create(competitorData);
         return ReS(res, competitor.toJSON(), 201);
     } catch (error) {
         return ReE(res, error.message, 422);
@@ -162,10 +174,22 @@ module.exports.deleteCompetitor = deleteCompetitor;
 
 var addPlayer = async function (req, res) {
     try {
-        const { marketInformationId, name } = req.body;
-        if (!marketInformationId || !name) return ReE(res, "marketInformationId and name are required", 400);
+        const { companyId, name } = req.body;
+        if (!companyId || !name) return ReE(res, "companyId and name are required", 400);
 
-        const player = await model.IndustryPlayer.create(req.body);
+        // Find the company's Market Information record, or create one if it doesn't exist yet
+        let marketInformation = await model.MarketInformation.findOne({
+            where: { companyId, isDeleted: false },
+        });
+
+        if (!marketInformation) {
+            marketInformation = await model.MarketInformation.create({ companyId });
+        }
+
+        const playerData = { ...req.body, marketInformationId: marketInformation.id };
+        delete playerData.companyId; // not a field on IndustryPlayer
+
+        const player = await model.IndustryPlayer.create(playerData);
         return ReS(res, player.toJSON(), 201);
     } catch (error) {
         return ReE(res, error.message, 422);
