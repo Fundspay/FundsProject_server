@@ -110,14 +110,28 @@ var deleteRecord = async function (req, res) {
 };
 module.exports.deleteRecord = deleteRecord;
 
+// ───── Helper: find-or-create the parent TechnicalArchitecture record for a company ─────
+async function getOrCreateTechnicalArchitecture(companyId) {
+    let record = await model.TechnicalArchitecture.findOne({ where: { companyId, isDeleted: false } });
+    if (!record) {
+        record = await model.TechnicalArchitecture.create({ companyId });
+    }
+    return record;
+}
+
 // ───── Third-Party Integrations ─────
 
 var addIntegration = async function (req, res) {
     try {
-        const { technicalArchitectureId, name } = req.body;
-        if (!technicalArchitectureId || !name) return ReE(res, "technicalArchitectureId and name are required", 400);
+        const { companyId, name } = req.body;
+        if (!companyId || !name) return ReE(res, "companyId and name are required", 400);
 
-        const integration = await model.ThirdPartyIntegration.create(req.body);
+        const technicalArchitecture = await getOrCreateTechnicalArchitecture(companyId);
+
+        const integrationData = { ...req.body, technicalArchitectureId: technicalArchitecture.id };
+        delete integrationData.companyId; // not a field on ThirdPartyIntegration
+
+        const integration = await model.ThirdPartyIntegration.create(integrationData);
         return ReS(res, integration, 201);
     } catch (error) {
         return ReE(res, error.message, 422);
@@ -155,10 +169,15 @@ module.exports.deleteIntegration = deleteIntegration;
 
 var addRisk = async function (req, res) {
     try {
-        const { technicalArchitectureId, name } = req.body;
-        if (!technicalArchitectureId || !name) return ReE(res, "technicalArchitectureId and name are required", 400);
+        const { companyId, name } = req.body;
+        if (!companyId || !name) return ReE(res, "companyId and name are required", 400);
 
-        const risk = await model.TechnicalRisk.create(req.body);
+        const technicalArchitecture = await getOrCreateTechnicalArchitecture(companyId);
+
+        const riskData = { ...req.body, technicalArchitectureId: technicalArchitecture.id };
+        delete riskData.companyId; // not a field on TechnicalRisk
+
+        const risk = await model.TechnicalRisk.create(riskData);
         return ReS(res, risk, 201);
     } catch (error) {
         return ReE(res, error.message, 422);
@@ -197,11 +216,13 @@ module.exports.deleteRisk = deleteRisk;
 // Add via URL
 var addReferenceUrl = async function (req, res) {
     try {
-        const { technicalArchitectureId, url } = req.body;
-        if (!technicalArchitectureId || !url) return ReE(res, "technicalArchitectureId and url are required", 400);
+        const { companyId, url } = req.body;
+        if (!companyId || !url) return ReE(res, "companyId and url are required", 400);
+
+        const technicalArchitecture = await getOrCreateTechnicalArchitecture(companyId);
 
         const doc = await model.ReferenceDocument.create({
-            technicalArchitectureId,
+            technicalArchitectureId: technicalArchitecture.id,
             docType: "url",
             url,
         });
@@ -215,12 +236,14 @@ module.exports.addReferenceUrl = addReferenceUrl;
 // Upload real file to S3
 var uploadReferenceFile = async function (req, res) {
     try {
-        const { technicalArchitectureId } = req.body;
-        if (!technicalArchitectureId) return ReE(res, "technicalArchitectureId is required", 400);
+        const { companyId } = req.body;
+        if (!companyId) return ReE(res, "companyId is required", 400);
         if (!req.file) return ReE(res, "No file uploaded", 400);
 
+        const technicalArchitecture = await getOrCreateTechnicalArchitecture(companyId);
+
         const doc = await model.ReferenceDocument.create({
-            technicalArchitectureId,
+            technicalArchitectureId: technicalArchitecture.id,
             docType: "file",
             name: req.file.originalname,
             url: req.file.location,

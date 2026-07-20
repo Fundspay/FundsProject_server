@@ -116,14 +116,28 @@ var deleteRecord = async function (req, res) {
 };
 module.exports.deleteRecord = deleteRecord;
 
+// ───── Helper: find-or-create the parent TechnicalAnalysis record for a company ─────
+async function getOrCreateTechnicalAnalysis(companyId) {
+    let record = await model.TechnicalAnalysis.findOne({ where: { companyId, isDeleted: false } });
+    if (!record) {
+        record = await model.TechnicalAnalysis.create({ companyId });
+    }
+    return record;
+}
+
 // ───── Business Problems ─────
 
 var addProblem = async function (req, res) {
     try {
-        const { technicalAnalysisId, name } = req.body;
-        if (!technicalAnalysisId || !name) return ReE(res, "technicalAnalysisId and name are required", 400);
+        const { companyId, name } = req.body;
+        if (!companyId || !name) return ReE(res, "companyId and name are required", 400);
 
-        const problem = await model.BusinessProblem.create(req.body);
+        const technicalAnalysis = await getOrCreateTechnicalAnalysis(companyId);
+
+        const problemData = { ...req.body, technicalAnalysisId: technicalAnalysis.id };
+        delete problemData.companyId; // not a field on BusinessProblem
+
+        const problem = await model.BusinessProblem.create(problemData);
         return ReS(res, problem, 201);
     } catch (error) {
         return ReE(res, error.message, 422);
@@ -161,10 +175,15 @@ module.exports.deleteProblem = deleteProblem;
 
 var addFuncReq = async function (req, res) {
     try {
-        const { technicalAnalysisId, name } = req.body;
-        if (!technicalAnalysisId || !name) return ReE(res, "technicalAnalysisId and name are required", 400);
+        const { companyId, name } = req.body;
+        if (!companyId || !name) return ReE(res, "companyId and name are required", 400);
 
-        const req_ = await model.FunctionalRequirement.create(req.body);
+        const technicalAnalysis = await getOrCreateTechnicalAnalysis(companyId);
+
+        const reqData = { ...req.body, technicalAnalysisId: technicalAnalysis.id };
+        delete reqData.companyId; // not a field on FunctionalRequirement
+
+        const req_ = await model.FunctionalRequirement.create(reqData);
         return ReS(res, req_, 201);
     } catch (error) {
         return ReE(res, error.message, 422);
@@ -202,10 +221,15 @@ module.exports.deleteFuncReq = deleteFuncReq;
 
 var addNonFuncReq = async function (req, res) {
     try {
-        const { technicalAnalysisId, name } = req.body;
-        if (!technicalAnalysisId || !name) return ReE(res, "technicalAnalysisId and name are required", 400);
+        const { companyId, name } = req.body;
+        if (!companyId || !name) return ReE(res, "companyId and name are required", 400);
 
-        const req_ = await model.NonFunctionalRequirement.create(req.body);
+        const technicalAnalysis = await getOrCreateTechnicalAnalysis(companyId);
+
+        const reqData = { ...req.body, technicalAnalysisId: technicalAnalysis.id };
+        delete reqData.companyId; // not a field on NonFunctionalRequirement
+
+        const req_ = await model.NonFunctionalRequirement.create(reqData);
         return ReS(res, req_, 201);
     } catch (error) {
         return ReE(res, error.message, 422);
@@ -243,10 +267,15 @@ module.exports.deleteNonFuncReq = deleteNonFuncReq;
 
 var addReport = async function (req, res) {
     try {
-        const { technicalAnalysisId, name } = req.body;
-        if (!technicalAnalysisId || !name) return ReE(res, "technicalAnalysisId and name are required", 400);
+        const { companyId, name } = req.body;
+        if (!companyId || !name) return ReE(res, "companyId and name are required", 400);
 
-        const report = await model.RequiredReport.create(req.body);
+        const technicalAnalysis = await getOrCreateTechnicalAnalysis(companyId);
+
+        const reportData = { ...req.body, technicalAnalysisId: technicalAnalysis.id };
+        delete reportData.companyId; // not a field on RequiredReport
+
+        const report = await model.RequiredReport.create(reportData);
         return ReS(res, report, 201);
     } catch (error) {
         return ReE(res, error.message, 422);
@@ -284,12 +313,14 @@ module.exports.deleteReport = deleteReport;
 
 var uploadAttachment = async function (req, res) {
     try {
-        const { technicalAnalysisId } = req.body;
-        if (!technicalAnalysisId) return ReE(res, "technicalAnalysisId is required", 400);
+        const { companyId } = req.body;
+        if (!companyId) return ReE(res, "companyId is required", 400);
         if (!req.file) return ReE(res, "No file uploaded", 400);
 
+        const technicalAnalysis = await getOrCreateTechnicalAnalysis(companyId);
+
         const attachment = await model.TechnicalAttachment.create({
-            technicalAnalysisId,
+            technicalAnalysisId: technicalAnalysis.id,
             fileName: req.file.originalname,
             fileUrl: req.file.location,
             fileSize: req.file.size,
