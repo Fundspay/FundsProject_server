@@ -116,10 +116,22 @@ module.exports.deleteRecord = deleteRecord;
 
 var addPainPoint = async function (req, res) {
     try {
-        const { businessOpportunityId, name } = req.body;
-        if (!businessOpportunityId || !name) return ReE(res, "businessOpportunityId and name are required", 400);
+        const { companyId, name } = req.body;
+        if (!companyId || !name) return ReE(res, "companyId and name are required", 400);
 
-        const painPoint = await model.PainPoint.create(req.body);
+        // Find the company's Business Opportunity record, or create one if it doesn't exist yet
+        let businessOpportunity = await model.BusinessOpportunity.findOne({
+            where: { companyId, isDeleted: false },
+        });
+
+        if (!businessOpportunity) {
+            businessOpportunity = await model.BusinessOpportunity.create({ companyId });
+        }
+
+        const painPointData = { ...req.body, businessOpportunityId: businessOpportunity.id };
+        delete painPointData.companyId; // not a field on PainPoint
+
+        const painPoint = await model.PainPoint.create(painPointData);
         return ReS(res, painPoint, 201);
     } catch (error) {
         return ReE(res, error.message, 422);
