@@ -33,7 +33,8 @@ var fetchAll = async function (req, res) {
             where: { isDeleted: false },
             include: [{ model: model.PainPoint, where: { isDeleted: false }, required: false }],
         });
-        return ReS(res, { success: true, data: records }, 200);
+        const plainRecords = records.map((r) => r.get({ plain: true }));
+        return ReS(res, { success: true, data: plainRecords }, 200);
     } catch (error) {
         return ReE(res, error.message, 500);
     }
@@ -51,7 +52,7 @@ var fetchSingle = async function (req, res) {
         });
         if (!record) return ReE(res, "Record not found", 404);
 
-        return ReS(res, record, 200);
+        return ReS(res, record.get({ plain: true }), 200);
     } catch (error) {
         return ReE(res, error.message, 500);
     }
@@ -70,7 +71,7 @@ var fetchByCompany = async function (req, res) {
         });
         if (!record) return ReE(res, "Record not found for this company", 404);
 
-        return ReS(res, record, 200);
+        return ReS(res, record.get({ plain: true }), 200);
     } catch (error) {
         return ReE(res, error.message, 500);
     }
