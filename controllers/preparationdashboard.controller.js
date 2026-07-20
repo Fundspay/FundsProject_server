@@ -26,7 +26,7 @@ var getDashboard = async function (req, res) {
         const featureChecklist = featureChecklistRaw.map((i) => i.get({ plain: true }));
         const knowledgeSummary = knowledgeSummaryRaw ? knowledgeSummaryRaw.get({ plain: true }) : null;
 
-        // ── P1 completion: any items present in at least N of 9 categories ──
+        // ── P1 completion: categories present out of 9 possible ──
         const p1Categories = new Set(salesResources.map((r) => r.category));
         const p1Filled = p1Categories.size;
         const p1Total = 9;
@@ -46,15 +46,37 @@ var getDashboard = async function (req, res) {
         const p3Fields = [
             p3DocCategories.size > 0,
             featureChecklist.length > 0,
-            knowledgeSummary && knowledgeSummary.content,
+            Boolean(knowledgeSummary && knowledgeSummary.content),
         ];
         const p3Filled = p3Fields.filter(Boolean).length;
         const p3Total = 3;
 
+        // ── Overall completion — total filled / total fields, same convention as A-master ──
+        const totalFilled = p1Filled + p2Filled + p3Filled;
+        const totalFields = p1Total + p2Total + p3Total;
+        const completionPercentage = totalFields > 0 ? Math.round((totalFilled / totalFields) * 100) : 0;
+
+        // Keep the per-section percentages too — useful for the UI's individual progress bars
         const p1Pct = Math.round((p1Filled / p1Total) * 100);
         const p2Pct = Math.round((p2Filled / p2Total) * 100);
         const p3Pct = Math.round((p3Filled / p3Total) * 100);
-        const overallPct = Math.round((p1Pct + p2Pct + p3Pct) / 3);
+
+        // ── Documents count (demo docs with a file + attachments) ──
+        const documentsUploaded =
+            demoDocuments.filter((d) => d.fileUrl || d.url).length +
+            (knowledgeSummary?.attachmentUrl ? 1 : 0);
+
+        // ── Last updated — most recent updatedAt across all sources ──
+        const allTimestamps = [
+            ...salesResources.map((r) => r.updatedAt),
+            ...communicationTemplates.map((t) => t.updatedAt),
+            ...checklist.map((c) => c.updatedAt),
+            ...objections.map((o) => o.updatedAt),
+            ...demoDocuments.map((d) => d.updatedAt),
+            ...featureChecklist.map((f) => f.updatedAt),
+            knowledgeSummary?.updatedAt,
+        ].filter(Boolean).map((d) => new Date(d).getTime());
+        const lastUpdated = allTimestamps.length ? new Date(Math.max(...allTimestamps)) : null;
 
         return ReS(res, {
             companyId: parseInt(companyId),
@@ -62,8 +84,10 @@ var getDashboard = async function (req, res) {
                 p1Count: 1,
                 p2Count: 1,
                 p3Count: 1,
-                totalSubModules: 3,
-                overallCompletionPercentage: overallPct,
+                totalWidgets: 3,
+                completionPercentage,
+                documentsUploaded,
+                lastUpdated,
             },
             p1SalesResources: { completionPercentage: p1Pct, categoriesFilled: p1Filled, totalCategories: p1Total, items: salesResources },
             p2Communication: { completionPercentage: p2Pct, templates: communicationTemplates, checklist, objections },
