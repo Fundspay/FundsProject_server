@@ -8,7 +8,7 @@ var getDashboard = async function (req, res) {
         const { companyId } = req.params;
         if (!companyId) return ReE(res, "companyId is required", 400);
 
-        const [businessProcess, technicalAnalysis, technicalArchitecture] = await Promise.all([
+        const [businessProcessRaw, technicalAnalysisRaw, technicalArchitectureRaw] = await Promise.all([
             model.BusinessProcess.findOne({
                 where: { companyId, isDeleted: false },
                 include: [
@@ -38,45 +38,51 @@ var getDashboard = async function (req, res) {
             }),
         ]);
 
+        // Convert to plain objects to avoid circular structure (Sequelize's include creates a 'parent' back-reference)
+        const businessProcess = businessProcessRaw ? businessProcessRaw.get({ plain: true }) : null;
+        const technicalAnalysis = technicalAnalysisRaw ? technicalAnalysisRaw.get({ plain: true }) : null;
+        const technicalArchitecture = technicalArchitectureRaw ? technicalArchitectureRaw.get({ plain: true }) : null;
+
         // ── Completion calculation ──
+        // A1 fields considered "filled" based on presence of children
         const a1Fields = businessProcess ? [
-            businessProcess.businessWorkflow, businessProcess.currentBusinessProcess,
-            businessProcess.Departments?.length, businessProcess.OperationalActivities?.length,
-            businessProcess.departmentDependencies, businessProcess.ExistingReports?.length,
-            businessProcess.diagramUrls?.length || businessProcess.ProcessDiagramFiles?.length,
+            businessProcess.Departments?.length,
+            businessProcess.OperationalActivities?.length,
+            businessProcess.ExistingReports?.length,
+            businessProcess.ProcessDiagramFiles?.length,
         ] : [];
         const a1Filled = a1Fields.filter(Boolean).length;
-        const a1Total = 7;
+        const a1Total = 4;
 
         const a2Fields = technicalAnalysis ? [
-            technicalAnalysis.BusinessProblems?.length, technicalAnalysis.FunctionalRequirements?.length,
-            technicalAnalysis.NonFunctionalRequirements?.length, technicalAnalysis.existingManualProcess,
-            technicalAnalysis.automationOpportunities, technicalAnalysis.RequiredReports?.length,
-            technicalAnalysis.approvalWorkflow, technicalAnalysis.businessRules,
+            technicalAnalysis.BusinessProblems?.length,
+            technicalAnalysis.FunctionalRequirements?.length,
+            technicalAnalysis.NonFunctionalRequirements?.length,
+            technicalAnalysis.RequiredReports?.length,
+            technicalAnalysis.TechnicalAttachments?.length,
         ] : [];
         const a2Filled = a2Fields.filter(Boolean).length;
-        const a2Total = 8;
+        const a2Total = 5;
 
         const a3Fields = technicalArchitecture ? [
-            technicalArchitecture.existingSoftware?.length, technicalArchitecture.ThirdPartyIntegrations?.length,
-            technicalArchitecture.currentDatabase, technicalArchitecture.currentHosting,
-            technicalArchitecture.technicalChallenges, technicalArchitecture.recommendedModules?.length,
+            technicalArchitecture.ThirdPartyIntegrations?.length,
             technicalArchitecture.TechnicalRisks?.length,
+            technicalArchitecture.ReferenceDocuments?.length,
         ] : [];
         const a3Filled = a3Fields.filter(Boolean).length;
-        const a3Total = 7;
+        const a3Total = 3;
 
         const totalFilled = a1Filled + a2Filled + a3Filled;
         const totalFields = a1Total + a2Total + a3Total;
         const completionPercentage = totalFields > 0 ? Math.round((totalFilled / totalFields) * 100) : 0;
 
-        // ── Documents count (across A1 diagrams, A2 attachments, A3 references) ──
+        // ── Documents count (diagram files + reference docs with a file) ──
         const documentsUploaded =
-            (businessProcess?.ProcessDiagramFiles || []).length +
-            (technicalAnalysis?.TechnicalAttachments || []).length +
-            (technicalArchitecture?.ReferenceDocuments || []).filter(d => d.docType === "file").length;
+            (businessProcess?.ProcessDiagramFiles || []).filter(f => f.fileUrl).length +
+            (technicalArchitecture?.ReferenceDocuments || []).filter(d => d.docType === "file").length +
+            (technicalAnalysis?.TechnicalAttachments || []).length;
 
-        // ── Last updated ──
+        // ── Last updated (most recent updatedAt among the three) ──
         const timestamps = [businessProcess?.updatedAt, technicalAnalysis?.updatedAt, technicalArchitecture?.updatedAt]
             .filter(Boolean)
             .map(d => new Date(d).getTime());
@@ -86,9 +92,9 @@ var getDashboard = async function (req, res) {
             companyId: parseInt(companyId),
             stats: {
                 a1Count: 4,
-                a2Count: 4,
-                a3Count: 4,
-                totalWidgets: 15,
+                a2Count: 5,
+                a3Count: 3,
+                totalWidgets: 12,
                 completionPercentage,
                 documentsUploaded,
                 lastUpdated,
