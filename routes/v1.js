@@ -18,6 +18,11 @@ const communicationRoutes = require("./communication.routes");
 const demoDocumentRoutes = require("./demodocument.routes");
 const preparationDashboardRoutes = require("./preparationdashboard.routes");
 const mapDashboardRoutes = require("./mapdashboard.routes");
+const companyIntelligenceRoutes = require("./companyintelligence.routes");
+const stakeholderRoutes = require("./stakeholder.routes");
+const companyResearchRoutes = require("./companyresearch.routes");
+const aMasterRoutes = require("./a-master.routes");
+const communicationLogRoutes = require("./communicationlog.routes");
 
 
 
@@ -48,7 +53,11 @@ router.use("/communication", communicationRoutes);
 router.use("/demo-document", demoDocumentRoutes);
 router.use("/preparation-dashboard", preparationDashboardRoutes);
 router.use("/map-dashboard", mapDashboardRoutes);
-
+router.use("/company-intelligence", companyIntelligenceRoutes);
+router.use("/stakeholders", stakeholderRoutes);
+router.use("/company-research", companyResearchRoutes);
+router.use("/a-master", aMasterRoutes);
+router.use("/communication-log", communicationLogRoutes);
 
 
 
