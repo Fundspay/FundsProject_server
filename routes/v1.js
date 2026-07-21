@@ -24,6 +24,8 @@ const companyResearchRoutes = require("./companyresearch.routes");
 const aMasterRoutes = require("./a-master.routes");
 const communicationLogRoutes = require("./communicationlog.routes");
 const meetingRoutes = require("./meeting.routes");
+const engagementRoutes = require("./engagement.routes");
+
 
 
 
@@ -59,6 +61,7 @@ router.use("/company-research", companyResearchRoutes);
 router.use("/a-master", aMasterRoutes);
 router.use("/communication-log", communicationLogRoutes);
 router.use("/meeting", meetingRoutes);
+router.use("/engagement", engagementRoutes);
 
 
 
