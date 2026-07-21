@@ -23,7 +23,7 @@ const stakeholderRoutes = require("./stakeholder.routes");
 const companyResearchRoutes = require("./companyresearch.routes");
 const aMasterRoutes = require("./a-master.routes");
 const communicationLogRoutes = require("./communicationlog.routes");
-
+const meetingRoutes = require("./meeting.routes");
 
 
 
@@ -58,6 +58,7 @@ router.use("/stakeholders", stakeholderRoutes);
 router.use("/company-research", companyResearchRoutes);
 router.use("/a-master", aMasterRoutes);
 router.use("/communication-log", communicationLogRoutes);
+router.use("/meeting", meetingRoutes);
 
 
 
