@@ -28,6 +28,7 @@ const engagementRoutes = require("./engagement.routes");
 const interactionMasterRoutes = require("./interactionmaster.routes");
 const opportunityRoutes = require("./opportunity.routes");
 const journeyRoutes = require("./journey.routes");
+const proposalRoutes = require("./proposal.routes");
 
 
 
@@ -68,6 +69,7 @@ router.use("/engagement", engagementRoutes);
 router.use("/interaction-master", interactionMasterRoutes);
 router.use("/opportunity", opportunityRoutes);
 router.use("/journey", journeyRoutes);
+router.use("/proposal", proposalRoutes);
 
 
 
