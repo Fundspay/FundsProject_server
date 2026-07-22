@@ -30,6 +30,8 @@ const opportunityRoutes = require("./opportunity.routes");
 const journeyRoutes = require("./journey.routes");
 const proposalRoutes = require("./proposal.routes");
 const opportunityMasterRoutes = require("./opportunitymaster.routes");
+const aimExecutiveRoutes = require("./aimexecutive.routes");
+
 
 
 
@@ -72,6 +74,7 @@ router.use("/opportunity", opportunityRoutes);
 router.use("/journey", journeyRoutes);
 router.use("/proposal", proposalRoutes);
 router.use("/opportunity-master", opportunityMasterRoutes);
+router.use("/aim-executive", aimExecutiveRoutes);
 
 
 
